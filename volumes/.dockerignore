@@ -1,0 +1,2 @@
+# With docker ignore we can specify which folders and files should not be copied by a copy instruction
+node_modules

@@ -1,0 +1,74 @@
+# When using docker compose you do not need to add --rm and -d, because when you bring serviced down
+# they will be removed.
+version: "3.8" # Docker compose file version, indentation matters like python
+services: # The services can be used to send request and to leverage the newtork Docker Compose creates
+  mongodb:
+    image: "mongo" # It can be just image name or full URL to another repository where the image is stored
+    
+    volumes: 
+      - data:/data/db #Ex: <volume_name>:<path_inside_container>
+    
+    #* envorironment: Environment variables, you may want to use env_file to have better security
+    #*   - MONGO_INITDB_ROOT_USERNAME: max
+    #*   - MONGO_INITDB_ROOT_PASSWORD: secret
+    env_file:
+      - ./env/mongo.env
+    
+    #* networks: #You do not need to define networks since docker automatically create new environment
+    #* for all the services specified in the compose file and it will add all the services to that network
+
+
+  backend:
+    # image: "goals-node" # we can use built image to create containers
+
+    #* Instead of an finished image, we can give the information required to build a new image
+    #* The relative path of Dockerfile should be given to build the container
+    build: ./backend 
+    
+    # build:
+    #  context: ./backend  Relative path of the Dockerfile, it is the place where Dockerfile be generated
+    #  So this should also be set to folder which includes everything to the Dockerfile might be reffering to
+    #  dockerfile: Dockerfile  Name of Dockerfile, if it is not specified as Dockerfile
+
+    ports: # List published ports
+      - "80:80"
+    
+    volumes: 
+      - logs:/app/logs
+      - ./backend:/app # Bind mount
+      - /app/node_modules # Anonymous volume
+    
+    env_file:
+      - ./env/backend.env
+
+    #* One container might be depend on another component to be up and running already
+    depends_on: 
+      - mongodb # The name of the service that this service depends on
+
+
+  frontend:
+    build: ./frontend # Only rebuilds image if something changed in the code whenever compose file run
+    ports: 
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+
+#? If we use same volume name in different services, the volume will be shared. Different containers can use same volume.
+#? Thus, use same folder on my hosting machine.
+#! Anonymous volumes and bind mounts do not need to be specified here.
+volumes: # This key need to be added to the services indentation level and any named volumes have to be listed here
+  data: # This is the name of the volume given in mongodb volumes section
+  logs:
+
+
+## Docker compose commands ##
+
+#* docker-compose up -d => pull, build all the images and start containers
+#? -d is for detached mode, it will run in the background
+
+#* docker-compose down => will stop all the services and remove all the containers
+#? This command does not delete volumes. To delete volumes add -v flag to command
+
