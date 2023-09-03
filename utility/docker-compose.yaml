@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  npm:
+    build: ./
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app #Bind mount #Ex: <path-to-docker-compose.yaml>:<directory-to-mount>
+
+# docker-compose exec => Run commands in already running containers 
+# docker-compose run => Run a single service from this yaml file in case we have multiple services
+# by the service name 
