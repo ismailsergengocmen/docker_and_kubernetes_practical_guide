@@ -8,13 +8,15 @@ services: # The services can be used to send request and to leverage the newtork
     volumes: 
       - data:/data/db #Ex: <volume_name>:<path_inside_container>
     
+    container_name: mongodb # Name of the container, if not specified docker compose will generate a name
+
     #* envorironment: Environment variables, you may want to use env_file to have better security
     #*   - MONGO_INITDB_ROOT_USERNAME: max
     #*   - MONGO_INITDB_ROOT_PASSWORD: secret
     env_file:
       - ./env/mongo.env
     
-    #* networks: #You do not need to define networks since docker automatically create new environment
+    #* networks: You do not need to define networks since docker automatically create new environment
     #* for all the services specified in the compose file and it will add all the services to that network
 
 
@@ -34,9 +36,9 @@ services: # The services can be used to send request and to leverage the newtork
       - "80:80"
     
     volumes: 
-      - logs:/app/logs
-      - ./backend:/app # Bind mount
-      - /app/node_modules # Anonymous volume
+      - logs:/app/logs #Ex: <volume_name>:<path_inside_container>
+      - ./backend:/app # Bind mount Ex: <path_on_host_machine>:<path_inside_container>
+      - /app/node_modules # Anonymous volume Ex: <path_inside_container>
     
     env_file:
       - ./env/backend.env
@@ -68,7 +70,14 @@ volumes: # This key need to be added to the services indentation level and any n
 
 #* docker-compose up -d => pull, build all the images and start containers
 #? -d is for detached mode, it will run in the background
+#* With the --build, we force the images to be rebuilt
+#* If docker compose finds the image the next time it tires to start all these services, it will resute the existing image
+
 
 #* docker-compose down => will stop all the services and remove all the containers
 #? This command does not delete volumes. To delete volumes add -v flag to command
+
+
+#* docker-compose build => Only builds the images given in docker-compose.yaml
+
 
